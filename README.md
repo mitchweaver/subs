@@ -16,9 +16,6 @@ Thus [subs](http://github.com/mitchweaver/subs) was born.
 
 ![subs_dmenu](https://wvr.sh/u/tXCc.png)
 
-%% ![subs_gen_link](https://wvr.sh/u/amv5.png)
-%% ![subs_update](https://wvr.sh/u/Iic0.png)
-
 ## Environment
 
 Create your `$SUBS_FILE`, as described below, and export this var its path.
