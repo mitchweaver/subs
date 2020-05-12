@@ -1,0 +1,2 @@
+script:
+  - shellcheck -s sh subs
