@@ -1,20 +1,23 @@
 # subs [![Build Status](https://api.travis-ci.org/mitchweaver/subs.svg?branch=master)](https://travis-ci.com/mitchweaver/subs)
 
-Have a feed of your YouTube subscriptions.
+Have a feed of your YouTube subscriptions. No Google account needed.
 
 Select a choice and with dmenu and view with mpv.
 
+Written in POSIX sh.
+
+deps: curl, mpv, dmenu
+
 ## About
 
-I'm a fan of command line and "doing things yourself". I also don't
-like having a Google account, but still want to keep track of
-subscriptions. Thus [subs](http://github.com/mitchweaver/subs) was born.
+I'm a fan of command line and "doing things yourself".  
+I also don't like having a Google account, but still want to keep track of subscriptions.  
+Thus [subs](http://github.com/mitchweaver/subs) was born.
 
 ![subs_dmenu](https://wvr.sh/u/tXCc.png)
 
-![subs_gen_link](https://wvr.sh/u/amv5.png)
-
-![subs_update](https://wvr.sh/u/Iic0.png)
+%% ![subs_gen_link](https://wvr.sh/u/amv5.png)
+%% ![subs_update](https://wvr.sh/u/Iic0.png)
 
 ## Environment
 
@@ -55,4 +58,4 @@ As you can see, some of these are usernames and some are channel IDs -- either w
 
 ## Safety
 
-Every commit is [shellchecked](https://github.com/mitchweaver/subs/blob/master/.travis.yml) with travis with no cases ignored.
+Every commit is [shellchecked](https://github.com/mitchweaver/subs/blob/master/.travis.yml) with travis.
