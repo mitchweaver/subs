@@ -12,7 +12,6 @@
 # -/-/-/-/- Settings -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
 : "${SUBS_FILE:=~/files/subs.txt}"
 : "${SUBS_MENU_PROG:='dmenu -p Subs:'}"
-: "${PLUMBER:=head}"
 : "${SUBS:=${XDG_CACHE_HOME:-~/.cache}/subs}"
 : "${SUBS_LINKS:=$SUBS/links}"
 : "${SUBS_CACHE:=$SUBS/cache}"
@@ -158,7 +157,7 @@ cat_subs() {
 }
 
 # Split the concatenated lines into entities, send to menu program.
-# Finally, pipe this result to the ${PLUMBER}.
+# Finally, play the result with mpv.
 get_sel() {
     sel=$(cat_subs | $SUBS_MENU_PROG)
 
@@ -171,8 +170,12 @@ get_sel() {
         case $line in
             *"$SEP$title$SEP"*)
                 url=${line##*$SEP}
-                printf 'playing: %s\n' "$url"
-                printf '%s\n' "$url" | $PLUMBER
+                if [ "$url" ] ; then
+                    printf 'playing: %s\n' "$url"
+                    # Play the selection.
+                    # shellcheck disable=2086
+                    exec mpv $MPV_OPTS "$url"
+                fi
                 break
         esac
     done <"$SUBS_CACHE/$chan"
