@@ -9,9 +9,7 @@
 # For more information and examples, see:
 # http://github.com/mitchweaver/subs
 #
-# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*#
-
-# -*-*-*-*-* Settings *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*
+# -/-/-/-/- Settings -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
 : "${SUBS_FILE:=~/files/subs.txt}"
 : "${SUBS_MENU_PROG:='dmenu -p Subs:'}"
 : "${PLUMBER:=head}"
@@ -20,7 +18,7 @@
 : "${SUBS_CACHE:=$SUBS/cache}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SEP=^^^^^ # shouldn't need to change this
-# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
 
 die() {
     >&2 printf '%s\n' "$*"
