@@ -33,6 +33,8 @@ changes from the feeds and store it back into the cache locally.
 This way the cache only is updated when you choose to, rather than
 redownloading them all every run.
 
+When you're ready to view, just run `subs`.
+
 ## Subs File
 
 The `$SUBS_FILE` file is a normal text file containing usernames of your subscriptions.  
