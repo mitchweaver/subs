@@ -2,7 +2,7 @@
 
 Have a feed of your YouTube subscriptions. No Google account needed.
 
-Select a choice and with dmenu and view with mpv.
+Select a choice with dmenu and view with mpv.
 
 Written in POSIX sh.
 
