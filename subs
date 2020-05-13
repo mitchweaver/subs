@@ -141,8 +141,6 @@ update_subs() {
 # Grab current cache of subscriptions, sort by date uploaded
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 cat_subs() {
-    [ -d "$SUBS_CACHE" ] || die 'Subs cache has not been retrieved.'
-
     sort -r "$SUBS_CACHE"/* | \
     while read -r line ; do
         chan=${line#*$SEP}
@@ -159,7 +157,11 @@ cat_subs() {
 # Split the concatenated lines into entities, send to menu program.
 # Finally, play the result with mpv.
 get_sel() {
-    sel=$(cat_subs | $SUBS_MENU_PROG)
+    if [ -d "$SUBS_CACHE" ] ; then
+        sel=$(cat_subs | $SUBS_MENU_PROG)
+    else
+        die 'Subs cache has not been retrieved.'
+    fi
 
     [ "$sel" ] || die Interrupted
 
