@@ -18,9 +18,14 @@ Thus [subs](http://github.com/mitchweaver/subs) was born.
 
 ## Environment
 
-Create your `$SUBS_FILE`, as described below, and export this var its path.
+Create your `$SUBS_FILE`, as described below, and export this variable as its path.
 
-Next set your `$SUBS_MENU_PROG` if desired, by default the menu will be `dmenu -p Subs:`.
+Example, in `~/.profile`:
+
+`export SUBS_FILE=/path/to/your/subs.txt`
+
+Next set your `$SUBS_MENU_PROG` if desired, (ex: if you want to use rofi).  
+By default the menu will be `dmenu -p Subs:`.
 
 ## Usage
 
