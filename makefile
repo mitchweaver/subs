@@ -5,10 +5,10 @@ all:
 	@>&2 echo "Use 'make install'"
 
 install:
-	install -D -m 0755 ${NAME} ${PREFIX}/bin/${NAME}
+	install -D -m 0755 ${NAME} ${DESTDIR}${PREFIX}/bin/${NAME}
 
 uninstall:
-	rm ${PREFIX}/bin/${NAME}
+	rm ${DESTDIR}${PREFIX}/bin/${NAME}
 
 test:
 	shellcheck -s sh ${NAME}
