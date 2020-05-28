@@ -15,6 +15,7 @@
 : "${SUBS:=${XDG_CACHE_HOME:-~/.cache}/subs}"
 : "${SUBS_LINKS:=$SUBS/links}"
 : "${SUBS_CACHE:=$SUBS/cache}"
+# : "${SLEEP_VALUE:=0.1}" # may need this if you experience problems
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SEP=^^^^^ # shouldn't need to change this
 # -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
@@ -125,7 +126,7 @@ update_subs() {
         count=$(( count + 1 ))
         printf 'starting job [%s/%s] for %s\n' "$count" "$total" "$link"
         get_vids "$link" &
-        sleep 0.1
+        sleep "${SLEEP_VALUE:-0}"
     done <"$SUBS_LINKS"
 
     count=0
