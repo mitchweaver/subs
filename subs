@@ -62,8 +62,8 @@ gen_links() {
         esac
 
         # otherwise we are given a username, we must find out its channel ID
-        curl -sfL --retry 10 "https://youtube.com/user/$line/about" | grep channel_id | \
-            sed -e 's|www\.||' -e 's|.*href="||' -e 's|">.*||' >>"$SUBS_LINKS"
+	curl -sfL --retry 10 "https://youtube.com/user/$line/about" | \
+		echo "https://youtube.com/feeds/videos.xml?channel_id=$(grep -ohm 1 'channel\/UC......................' | tail -c 25)" >>"$SUBS_LINKS"
 
     done <"$SUBS_FILE"
 }
