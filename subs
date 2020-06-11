@@ -178,8 +178,8 @@ get_sel() {
     [ "$sel" ] || die Interrupted
 
     oldchan="${sel#* }"
-    chan=$(printf "${oldchan%%] *}" | sed -e 's/\&/&amp;/g' -e 's/"/\&quot;/g'  -e 's/</\&lt;/g' -e 's/>/\&gt;/g' )
-    title=$(printf "${sel#*"${oldchan%%] *}"\] }" | sed -e 's/\&/&amp;/g' -e 's/"/\&quot;/g'  -e 's/</\&lt;/g' -e 's/>/\&gt;/g' )
+    chan=$(printf '%s' "${oldchan%%] *}" | sed -e 's/\&/&amp;/g' -e 's/"/\&quot;/g'  -e 's/</\&lt;/g' -e 's/>/\&gt;/g' )
+    title=$(printf '%s' "${sel#*"${oldchan%%] *}"\] }" | sed -e 's/\&/&amp;/g' -e 's/"/\&quot;/g'  -e 's/</\&lt;/g' -e 's/>/\&gt;/g' )
     while read -r line ; do
         case $line in
             *"$SEP$title$SEP"*)
