@@ -169,7 +169,7 @@ cat_subs() {
 # Finally, play the result with mpv.
 get_sel() {
     if [ -d "$SUBS_CACHE" ] ; then
-	# Pipe your subs feed into your desired menu and replace HTML escape codes (&quot; -> ")
+        # Pipe your subs feed into your desired menu and replace HTML escape codes (&quot; -> ")
         sel=$(cat_subs | sed -e 's/&quot;/"/g' -e 's/&amp;/\&/g' -e 's/&lt;/</g' -e 's/&gt;/>/g' | $SUBS_MENU_PROG)
     else
         die 'Subs cache has not been retrieved.'
