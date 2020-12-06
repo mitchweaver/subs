@@ -26,7 +26,7 @@ die() {
 }
 
 usage() {
-    die 'Usage: subs [-m no-video] [-g gen-links] [-u update-cache]'
+    die 'Usage: subs [-m no-video] [-g gen-links] [-u update-cache] [-d daemonize]'
 }
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -194,6 +194,26 @@ get_sel() {
     done <"$SUBS_CACHE/$chan"
 }
 
+daemonize() {
+    # create a cached copy of the subs file to check for changes
+    # if changes occur, re-generate links automatically
+    daemon_file=${XDG_CACHE_HOME:-~/.cache}/subs_daemon.cache
+    if [ ! -f "$daemon_file" ] ; then
+        cp -f "${SUBS_FILE:=~/files/subs.txt}" "$daemon_file"
+    fi
+
+    while true ; do
+        if ! cmp "${SUBS_FILE:=~/files/subs.txt}" "$daemon_file" ; then
+            gen_links
+            cp -f "${SUBS_FILE:=~/files/subs.txt}" "$daemon_file"
+        fi
+        update_subs
+        interval=${SUBS_DAEMON_INTERVAL:-$(( 5 * 60 ))}
+        printf 'Sleeping for %s seconds...\n' "$interval"
+        sleep "$interval"
+    done
+}
+
 main() {
     mkdir -p "$SUBS"
 
@@ -208,6 +228,7 @@ main() {
         g) gen_links ;;
         u) update_subs ;;
         c) cat_subs ;;
+        d) daemonize ;;
         *) get_sel
     esac
 }
