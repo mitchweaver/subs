@@ -15,7 +15,7 @@
 : "${SUBS:=${XDG_CACHE_HOME:-~/.cache}/subs}"
 : "${SUBS_LINKS:=$SUBS/links}"
 : "${SUBS_CACHE:=$SUBS/cache}"
-: "${SUBS_SLEEP_VALUE:=0.1}" # raise this if you experience problems
+: "${SUBS_SLEEP_VALUE:=0.05}" # raise this if you experience problems
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SEP=^^^^^ # shouldn't need to change this
 # -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
@@ -42,39 +42,52 @@ gen_links() {
     total=$(sed -e '/^$/d' -e '/^#/d' <"$SUBS_FILE" | wc -l)
 
     while read -r line ; do
+
         # ignore comments and blank lines
         case $line in ''|' '|'#'*) continue ;; esac
+
         # strip off in-line comments and any trailing whitespace
         line=${line%%#*}
         line=${line%% *}
 
         count=$(( count + 1 ))
-        printf "[%s/%s] fetching channel xml link for %s\n" "$count" "$total" "$line"
 
         case $line in
             UC*)
                 # YT channel IDs always begin with 'UC' and are 24 chars long
-                if [ ${#line} -eq 24 ] ; then
+                printf "[%s/%s] using channel ID '%s' for xml link\n" "$count" "$total" "$line"
+
+                [ ${#line} -eq 24 ] &&
                     printf 'https://youtube.com/feeds/videos.xml?%s\n' \
                         "channel_id=$line" >>"$SUBS_LINKS"
-                    continue
-                fi
+                ;;
+            *)
+                # otherwise we are given a username, we must find out its channel ID
+                printf "fetching channel ID for %s...\n" "$line"
+
+                curl -sfL --retry 10 "https://youtube.com/user/$line/about" | \
+                while read -r line ; do
+                    case $line in
+                        *channel/UC??????????????????????*)
+                            line=${line##*channel/}
+                            line=${line%%\"*}
+                            printf "[%s/%s] using channel ID '%s' for xml link\n" "$count" "$total" "$line"
+                            printf 'https://youtube.com/feeds/videos.xml?channel_id=%s\n' \
+                                "$line" >>"$SUBS_LINKS"
+                            break
+                    esac
+                done &
+                sleep "${SUBS_SLEEP_VALUE:-0}"
         esac
 
-        # otherwise we are given a username, we must find out its channel ID
-        curl -sfL --retry 10 "https://youtube.com/user/$line/about" | \
-        while read -r line ; do
-            case $line in
-                *channel/UC??????????????????????*)
-                    line=${line##*channel/}
-                    line=${line%%\"*}
-                    printf 'https://youtube.com/feeds/videos.xml?channel_id=%s\n' \
-                        "$line" >>"$SUBS_LINKS"
-                    break
-            esac
-        done
-
     done <"$SUBS_FILE"
+
+    count=0
+    while [ "$count" -ne "$total" ] ; do
+        count=$(wc -l < "$SUBS_LINKS")
+        printf "[%s/%s] waiting for jobs to complete...\n"  "$count" "$total"
+        sleep 0.5
+    done
 }
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
