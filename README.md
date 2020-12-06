@@ -60,6 +60,11 @@ UCF9cNYdVSYS_oha1eGzDTGQ # Goniloc
 
 As you can see, some of these are usernames and some are channel IDs -- either work just fine.
 
+## Daemonization
+
+If you would like `subs` to run in the background and intermittently update the cache, you can
+daemonize it with the `[-d]` flag.
+
 ## Safety
 
 Every commit is [shellchecked](https://github.com/mitchweaver/subs/blob/master/.travis.yml) with travis.
