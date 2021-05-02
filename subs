@@ -15,7 +15,7 @@
 : "${SUBS:=${XDG_CACHE_HOME:-~/.cache}/subs}"
 : "${SUBS_LINKS:=$SUBS/links}"
 : "${SUBS_CACHE:=$SUBS/cache}"
-: "${SUBS_SLEEP_VALUE:=0.05}" # raise this if you experience problems
+: "${SUBS_SLEEP_VALUE:=0.1}" # raise this if you experience problems
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SEP=^^^^^ # shouldn't need to change this
 # -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
@@ -26,7 +26,7 @@ die() {
 }
 
 usage() {
-    die 'Usage: subs [-m no-video] [-g gen-links] [-u update-cache] [-d daemonize]'
+    die 'Usage: subs [-m no-video] [-g gen-links] [-u update-cache] [-d daemonize] [-n dont-play]'
 }
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -142,6 +142,8 @@ update_subs() {
     mkdir -p "$SUBS_CACHE"
 
     total=$(wc -l <"$SUBS_LINKS")
+    set -- $total
+    total=$1
 
     count=0
     while read -r link ; do
@@ -154,6 +156,8 @@ update_subs() {
     count=0
     while [ "$count" -ne "$total" ] ; do
         count=$(printf '%s\n' "$SUBS_CACHE"/* | wc -l)
+        set -- $count
+        count=$1
         printf "[%s/%s] waiting for fetch jobs to complete...\n"  "$count" "$total"
         sleep 0.5
     done
@@ -197,10 +201,15 @@ get_sel() {
             *"$SEP$title$SEP"*)
                 url=${line##*$SEP}
                 if [ "$url" ] ; then
-                    printf 'playing: %s\n' "$url"
-                    # Play the selection.
-                    # shellcheck disable=2086
-                    exec mpv $MPV_OPTS "$url"
+                    if [ "$DONT_PLAY" ] ; then
+                        # just print the url
+                        # (useful for piping to other programs)
+                        printf '%s\n' "$url"
+                    else
+                        # shellcheck disable=2086
+                        printf 'playing: %s\n' "$url"
+                        exec mpv $MPV_OPTS "$url"
+                    fi
                 fi
                 break
         esac
@@ -213,6 +222,7 @@ daemonize() {
     daemon_file=${XDG_CACHE_HOME:-~/.cache}/subs_daemon.cache
     if [ ! -f "$daemon_file" ] ; then
         cp -f "${SUBS_FILE:=~/files/subs.txt}" "$daemon_file"
+        gen_links
     fi
 
     while true ; do
@@ -231,6 +241,9 @@ main() {
     mkdir -p "$SUBS"
 
     case ${1#-} in
+        n)
+            DONT_PLAY=true
+            ;;
         m)
             export MPV_OPTS="$MPV_OPTS --no-video"
             shift
