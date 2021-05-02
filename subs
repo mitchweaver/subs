@@ -134,6 +134,7 @@ get_vids() {
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 # Updates the local cache of subscriptions. ([-u] flag)
+# shellcheck disable=2086
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 update_subs() {
     [ -f "$SUBS_LINKS" ] || die 'Subs links have not been generated.'
@@ -208,6 +209,7 @@ get_sel() {
                     else
                         # shellcheck disable=2086
                         printf 'playing: %s\n' "$url"
+                        # shellcheck disable=2086
                         exec mpv $MPV_OPTS "$url"
                     fi
                 fi
