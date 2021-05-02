@@ -1,4 +1,5 @@
 PREFIX = /usr/local
+LOCALPREFIX = ${HOME}/.local
 NAME = subs
 
 all:
@@ -6,6 +7,9 @@ all:
 
 install:
 	install -D -m 0755 ${NAME} ${DESTDIR}${PREFIX}/bin/${NAME}
+
+localinstall:
+	install -D -m 0755 ${NAME} ${DESTDIR}${LOCALPREFIX}/bin/${NAME}
 
 uninstall:
 	rm ${DESTDIR}${PREFIX}/bin/${NAME}
