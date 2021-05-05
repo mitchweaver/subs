@@ -15,7 +15,7 @@
 : "${SUBS:=${XDG_CACHE_HOME:-~/.cache}/subs}"
 : "${SUBS_LINKS:=$SUBS/links}"
 : "${SUBS_CACHE:=$SUBS/cache}"
-: "${SUBS_SLEEP_VALUE:=0.1}" # raise this if you experience problems
+: "${SUBS_SLEEP_VALUE:=0.25}" # raise this if you experience problems
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SEP=^^^^^ # shouldn't need to change this
 # -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
@@ -242,23 +242,34 @@ daemonize() {
 main() {
     mkdir -p "$SUBS"
 
-    case ${1#-} in
-        n)
-            DONT_PLAY=true
-            ;;
-        m)
-            export MPV_OPTS="$MPV_OPTS --no-video"
-            shift
-    esac
-
-    case ${1#-} in
-        h) usage ;;
-        g) gen_links ;;
-        u) update_subs ;;
-        c) cat_subs ;;
-        d) daemonize ;;
-        *) get_sel
-    esac
+    if [ "$1" ] ; then
+        case ${1#-} in
+            g)
+                gen_links
+                ;;
+            u)
+                update_subs
+                ;;
+            c)
+                cat_subs
+                ;;
+            d)
+                daemonize
+                ;;
+            m)
+                MPV_OPTS="$MPV_OPTS --no-video" \
+                get_sel
+                ;;
+            n)
+                DONT_PLAY=true \
+                get_sel
+                ;;
+            *)
+                usage
+        esac
+    else
+        get_sel
+    fi
 }
 
 main "$@"
