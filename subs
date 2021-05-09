@@ -178,11 +178,13 @@ update_subs() {
     done <"$SUBS_LINKS"
 
     count=0
-    while [ "$count" -ne "$total" ] ; do
+    max_retries=$total
+    while [ "$count" -ne "$total" ] && [ "$max_retries" -ne "$total" ] ; do
         count=$(printf '%s\n' "$SUBS_CACHE"/* | wc -l)
         count=${count##* }
         printf "[%s/%s] waiting for fetch jobs to complete...\n"  "$count" "$total"
         sleep 1
+        max_retries=$(( max_retries + 1 ))
     done
 
     printf '%s\n\n' 'done!'
