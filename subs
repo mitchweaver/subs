@@ -1,4 +1,12 @@
 #!/bin/sh
+#                     █████            
+#                    ▒▒███             
+#   █████  █████ ████ ▒███████   █████ 
+#  ███▒▒  ▒▒███ ▒███  ▒███▒▒███ ███▒▒  
+# ▒▒█████  ▒███ ▒███  ▒███ ▒███▒▒█████ 
+#  ▒▒▒▒███ ▒███ ▒███  ▒███ ▒███ ▒▒▒▒███
+#  ██████  ▒▒████████ ████████  ██████ 
+# ▒▒▒▒▒▒    ▒▒▒▒▒▒▒▒ ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒  
 #
 # Watch your youtube subscriptions without a youtube account
 # via curl, dmenu, mpv and basic unix commands.
@@ -9,15 +17,21 @@
 # For more information and examples, see:
 # http://github.com/mitchweaver/subs
 #
+# >> note: this is highly experimental / janky, it can and will break <<
+#
 # -/-/-/-/- Settings -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
 : "${SUBS_FILE:=~/files/subs.txt}"
 : "${SUBS_MENU_PROG:='dmenu -p Subs:'}"
 : "${SUBS:=${XDG_CACHE_HOME:-~/.cache}/subs}"
 : "${SUBS_LINKS:=$SUBS/links}"
 : "${SUBS_CACHE:=$SUBS/cache}"
-: "${SUBS_SLEEP_VALUE:=0.25}" # raise this if you experience problems
+: "${SUBS_SLEEP_VALUE:=1}" # raise this if you experience problems
+: "${SUBS_DAEMON_INTERVAL:=600}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SEP=^^^^^ # shouldn't need to change this
+# -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
+export LC_ALL=C    # this speeds things up a bit but can cause
+                   # issues for titles in foreign languages
 # -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
 
 die() {
@@ -40,6 +54,7 @@ gen_links() {
 
     count=0
     total=$(sed -e '/^$/d' -e '/^#/d' <"$SUBS_FILE" | wc -l)
+    total=${total##* }
 
     while read -r line ; do
 
@@ -55,20 +70,31 @@ gen_links() {
         case $line in
             UC*)
                 # YT channel IDs always begin with 'UC' and are 24 chars long
-                printf "[%s/%s] using channel ID '%s' for xml link\n" "$count" "$total" "$line"
+                if [ ${#line} -eq 24 ] ; then
+                    printf "[%s/%s] using channel ID '%s' for xml link\n" "$count" "$total" "$line"
 
-                [ ${#line} -eq 24 ] &&
                     printf 'https://youtube.com/feeds/videos.xml?%s\n' \
                         "channel_id=$line" >>"$SUBS_LINKS"
+                else
+                    >&2 printf 'Error: cannot determine channel for %s\n' "$line"
+                fi
                 ;;
             *)
                 # otherwise we are given a username, we must find out its channel ID
-                printf "fetching channel ID for %s...\n" "$line"
+                printf "Fetching channel ID for %s..." "$line"
 
-                curl -sfL --retry 10 "https://youtube.com/user/$line/about" | \
+                data=$(curl -sL --retry 10 "https://youtube.com/user/$line/about")
+                if printf '%s\n' "$data" | grep '404 Not Found' >/dev/null ; then
+                    >&2 printf '\n[ERROR]: Could not determine channel for %s... 404\n' "$line"
+                    >&2 printf '[%s] %s\n' "$(date)" "$line" >> "$SUBS"/ERRORS.log
+                    return 1
+                fi
+
+                printf '%s\n' "$data" | \
                 while read -r line ; do
                     case $line in
                         *channel/UC??????????????????????*)
+                            printf ' Found!\n'
                             line=${line##*channel/}
                             line=${line%%\"*}
                             printf "[%s/%s] using channel ID '%s' for xml link\n" "$count" "$total" "$line"
@@ -76,18 +102,10 @@ gen_links() {
                                 "$line" >>"$SUBS_LINKS"
                             break
                     esac
-                done &
-                sleep "${SUBS_SLEEP_VALUE:-0}"
+                done
         esac
 
     done <"$SUBS_FILE"
-
-    count=0
-    while [ "$count" -ne "$total" ] ; do
-        count=$(wc -l < "$SUBS_LINKS")
-        printf "[%s/%s] waiting for jobs to complete...\n"  "$count" "$total"
-        sleep 0.5
-    done
 }
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -97,7 +115,13 @@ gen_links() {
 # with a line of its videos dates, titles, and urls.
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 get_vids() {
-    data=$(curl -sfL --retry 15 "$1")
+    data=$(curl -sL --retry 15 "$1")
+
+    if printf '%s\n' "$data" | grep '404 Not Found' >/dev/null ; then
+        >&2 printf '[ERROR]: Could not get vids for %s... 404\n' "$1"
+        >&2 printf '[%s] %s\n' "$(date)" "$1" >> "$SUBS"/ERRORS.log
+        return 1
+    fi
 
     # hide the first <published> tag which is the channel
     # creation date
@@ -143,8 +167,7 @@ update_subs() {
     mkdir -p "$SUBS_CACHE"
 
     total=$(wc -l <"$SUBS_LINKS")
-    set -- $total
-    total=$1
+    total=${total##* }
 
     count=0
     while read -r link ; do
@@ -157,10 +180,9 @@ update_subs() {
     count=0
     while [ "$count" -ne "$total" ] ; do
         count=$(printf '%s\n' "$SUBS_CACHE"/* | wc -l)
-        set -- $count
-        count=$1
+        count=${count##* }
         printf "[%s/%s] waiting for fetch jobs to complete...\n"  "$count" "$total"
-        sleep 0.5
+        sleep 1
     done
 
     printf '%s\n\n' 'done!'
@@ -234,9 +256,8 @@ daemonize() {
             cp -f "${SUBS_FILE:=~/files/subs.txt}" "$daemon_file"
         fi
         update_subs
-        interval=${SUBS_DAEMON_INTERVAL:-$(( 5 * 60 ))}
-        printf 'Sleeping for %s seconds...\n' "$interval"
-        sleep "$interval"
+        printf 'Sleeping for %s seconds...\n' "$SUBS_DAEMON_INTERVAL"
+        sleep "$SUBS_DAEMON_INTERVAL"
     done
 }
 

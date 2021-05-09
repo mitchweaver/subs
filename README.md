@@ -14,7 +14,7 @@ I'm a fan of command line and "doing things yourself".
 I also don't like having a Google account, but still want to keep track of subscriptions.  
 Thus [subs](http://github.com/mitchweaver/subs) was born.
 
-![subs_dmenu](https://wvr.sh/u/tXCc.png)
+![subs_dmenu]()
 
 ## Environment
 
