@@ -21,7 +21,7 @@
 #
 # -/-/-/-/- Settings -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
 : "${SUBS_FILE:=~/files/subs.txt}"
-: "${SUBS_MENU_PROG:='dmenu -p Subs:'}"
+: "${SUBS_MENU_PROG:=dmenu -l 18 -p Subs:}"
 : "${SUBS:=${XDG_CACHE_HOME:-~/.cache}/subs}"
 : "${SUBS_LINKS:=$SUBS/links}"
 : "${SUBS_CACHE:=$SUBS/cache}"
