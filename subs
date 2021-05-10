@@ -232,7 +232,6 @@ get_sel() {
                         # (useful for piping to other programs)
                         printf '%s\n' "$url"
                     else
-                        # shellcheck disable=2086
                         printf 'playing: %s\n' "$url"
                         # shellcheck disable=2086
                         exec mpv $MPV_OPTS "$url"
